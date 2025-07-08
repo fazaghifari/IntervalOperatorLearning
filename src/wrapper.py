@@ -33,8 +33,12 @@ def linex_loss(d,a):
     term1 = (tf.exp(-a*d)+(a*d)-1)
     return b*term1
 
+def pseudohuber(d, delta=2):
+    sqrt_term = tf.sqrt(1 + tf.square(d/delta))
+    res = delta**2 * (sqrt_term - 1)
+    return res
 
-def trainer(model, x_train, y_train, epochs=200, linex_a=5):
+def trainer(model, x_train, y_train, epochs=200, linex_a=5, loss_type="linex"):
     """Trainer wrapper for Interval MLP model
 
     Args:
@@ -42,6 +46,7 @@ def trainer(model, x_train, y_train, epochs=200, linex_a=5):
         data (_type_): _description_
         config_dict (_type_): _description_
     """
+    assert loss_type in ["linex", "mse", "pseudo_huber"], 'Available options: ["linex", "mse", "pseudo_huber"]'
     loss_tracker = keras.metrics.Mean(name="Loss")
     result_history = []
 
@@ -66,21 +71,28 @@ def trainer(model, x_train, y_train, epochs=200, linex_a=5):
             # Extract upper and lower probabilities
             preds_lo, preds_up = preds
             
-             # linex loss
-            err_lo = (np.array(target[...,0], dtype=float) - preds_lo) #preds better be lower than target
-            err_hi = (preds_up - np.array(target[...,1], dtype=float)) #target better be lower than preds
-            term1 = linex_loss(err_lo, a=linex_a)
-            term2 = linex_loss(err_hi, a=linex_a)
-            dist = preds_up-preds_lo
-            loss = tf.reduce_mean(term1) + tf.reduce_mean(term2) + neg_distance_pen(dist)
+            if loss_type == "linex":
+                # linex loss
+                err_lo = (np.array(target[...,0], dtype=float) - preds_lo) #preds better be lower than target
+                err_hi = (preds_up - np.array(target[...,1], dtype=float)) #target better be lower than preds
+                term1 = linex_loss(err_lo, a=linex_a)
+                term2 = linex_loss(err_hi, a=linex_a)
+                dist = preds_up-preds_lo
+                loss = tf.reduce_mean(term1) + tf.reduce_mean(term2) + tf.reduce_mean(neg_distance_pen(dist))
 
-            # # Classical loss
-            # mid_target = 0.5*(target_lo + target_hi)
-            # mid_pred = 0.5*(preds_lo + preds_up)
-            # term1 = tf.square(target_lo - preds_lo)
-            # term2 = tf.square(target_hi - preds_up)
-            # # term3 = tf.square(mid_target - mid_pred)
-            # loss = tf.reduce_mean(term1 + term2 )
+            elif loss_type == "pseudo_huber":
+                # Pseudo Huber
+                term1 = pseudohuber(np.array(target[...,0], dtype=float) - preds_lo, delta=1)
+                term2 = pseudohuber(preds_up - np.array(target[...,1], dtype=float), delta=1)
+                term3 = neg_distance_pen(preds_up-preds_lo)
+                loss = tf.reduce_mean(term1) + tf.reduce_mean(term2) + tf.reduce_mean(term3)
+
+            else:
+                # Classical loss
+                term1 = tf.square(np.array(target[...,0], dtype=float) - preds_lo)
+                term2 = tf.square(np.array(target[...,1], dtype=float) - preds_up)
+                term3 = neg_distance_pen(preds_up-preds_lo)
+                loss = tf.reduce_mean(term1 + term2) + tf.reduce_mean(term3)
         
         grads = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(grads, model.trainable_variables))
