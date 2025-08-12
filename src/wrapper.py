@@ -38,7 +38,7 @@ def pseudohuber(d, delta=2):
     res = delta**2 * (sqrt_term - 1)
     return res
 
-def trainer(model, x_train, y_train, epochs=200, linex_a=5, loss_type="linex"):
+def trainer(model, x_train, y_train, epochs=200, linex_a=5, loss_type="linex", verbose=True):
     """Trainer wrapper for Interval MLP model
 
     Args:
@@ -109,9 +109,10 @@ def trainer(model, x_train, y_train, epochs=200, linex_a=5, loss_type="linex"):
 
         t2 = default_timer()
         template = ("Epoch {}, Loss: {:.4f}, Time: {} s")
-        print(template.format(epoch+1, loss_tracker.result(), t2-t1))
+        if verbose:
+            print(template.format(epoch+1, loss_tracker.result(), t2-t1))
     
-    return model
+    return model, result_history
 
 def model_evaluate(model, x_test, y_test):
     """_summary_

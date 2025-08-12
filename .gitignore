@@ -177,3 +177,7 @@ cython_debug/
 *.ipynb
 *.pkl
 .DS_Store
+data/
+img/
+tournament_unrelated.py
+.vscode/

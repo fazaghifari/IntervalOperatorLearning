@@ -29,6 +29,8 @@ def construct_interval(x_train, y_train, n_clusters=[10]):
     
     x_train_int = []
     y_train_int = []
+    x_clust = []
+    y_clust = []
     
     for n_clus in tqdm(n_clusters):
         kmeans = KMeans(n_clusters=n_clus, random_state=42).fit(x_use)
@@ -46,8 +48,10 @@ def construct_interval(x_train, y_train, n_clusters=[10]):
             
             x_train_int.append(np.stack([x_min,x_max], axis=-1))
             y_train_int.append(np.stack([y_min,y_max], axis=-1))
+            x_clust.append(x_cluster)
+            y_clust.append(y_cluster)
     
     x_train_int = np.array(x_train_int)
     y_train_int = np.array(y_train_int)
 
-    return x_train_int, y_train_int
+    return x_train_int, y_train_int, x_clust, y_clust
