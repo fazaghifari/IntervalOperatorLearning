@@ -78,6 +78,7 @@ def trainer(model, y_train, u_train, g_train, u_val=None, y_val=None, g_val=None
     ### END INNER FUNCTION BLOCK ###
 
     best_loss = np.inf
+    best_weights = None
     for epoch in range(epochs):
         
         if scheduler is not None:
