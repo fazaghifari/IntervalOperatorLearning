@@ -83,7 +83,7 @@ def trainer(model, y_train, u_train, g_train, u_val=None, y_val=None, g_val=None
         
         if scheduler is not None:
             new_lr = scheduler(epoch)
-            model.optimizer.lr.assign(new_lr)
+            model.optimizer.learning_rate.assign(new_lr)
 
         t1 = default_timer()
         for data in train_dataset:
