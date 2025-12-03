@@ -181,3 +181,9 @@ data/
 img/
 tournament_unrelated.py
 .vscode/
+
+!simple1dreg_aug_inn_example.ipynb
+!simple1dreg_aug_naive_example.ipynb
+!deeponet1d_aug_inn_example.ipynb
+!deeponet_1d_ideal_naive_example.ipynb
+!deeponet1d_aug_naive_example.ipynb
