@@ -189,3 +189,5 @@ tournament_unrelated.py
 !deeponet1d_aug_naive_example.ipynb
 !Darcy2d_aug_CROWN_example.ipynb
 !Darcy2d_mid_aug_IBP_example.ipynb
+!simple1dreg_aug_naive_conf.ipynb
+!deeponet1d_aug_naive_conf.ipynb
